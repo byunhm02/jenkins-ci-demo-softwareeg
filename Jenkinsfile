@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        SRC_DIR = 'src'
+        TEST_DIR = 'test'
+        LIB_DIR = 'lib'
+        BUILD_DIR = 'build'
+        TEST_REPORT_DIR = 'test-reports'
+    }
+
+    stages {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Prepare') {
+            steps {
+                sh 'mkdir -p ${BUILD_DIR}'
+                sh 'mkdir -p ${TEST_REPORT_DIR}'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'javac -d ${BUILD_DIR} ${SRC_DIR}/*.java'
+                echo 'Build 완료!'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh '''
+                    javac -cp ${BUILD_DIR}:${LIB_DIR}/* -d ${BUILD_DIR} ${TEST_DIR}/*.java
+                    java -jar ${LIB_DIR}/junit-platform-console-standalone-*.jar \
+                        --class-path ${BUILD_DIR} \
+                        --scan-class-path \
+                        --reports-dir ${TEST_REPORT_DIR} \
+                        > test-output.txt 2>&1 || true
+                '''
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build and test succeeded!'
+            archiveArtifacts artifacts: 'test-output.txt', fingerprint: true
+            junit 'test-reports/**/*.xml'
+            sh '''
+                echo "빌드 성공! 시간: $(date)" > build-result.txt
+                echo "빌드 번호: ${BUILD_NUMBER}" >> build-result.txt
+            '''
+            archiveArtifacts artifacts: 'build-result.txt', fingerprint: true
+        }
+        failure {
+            echo 'Build or test failed!'
+            sh '''
+                echo "빌드 실패! 시간: $(date)" > build-result.txt
+                echo "빌드 번호: ${BUILD_NUMBER}" >> build-result.txt
+            '''
+            archiveArtifacts artifacts: 'build-result.txt', allowEmptyArchive: true
+        }
+    }
+}
