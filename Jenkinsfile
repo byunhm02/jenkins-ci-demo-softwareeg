@@ -39,6 +39,7 @@ pipeline {
                         --scan-class-path \
                         --reports-dir ${TEST_REPORT_DIR} \
                         --disable-ansi-colors \
+                        --details=flat \
                         > test-output.txt 2>&1 || true
                 '''
             }
