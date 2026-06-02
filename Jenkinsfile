@@ -55,6 +55,9 @@ pipeline {
                 echo "Build Number: ${BUILD_NUMBER}" >> build-result.txt
             '''
             archiveArtifacts artifacts: 'build-result.txt', fingerprint: true
+            mail to: 'byunhm02@gmail.com',
+                             subject: "Jenkins Build #${BUILD_NUMBER} Success",
+                             body: "Build #${BUILD_NUMBER} succeeded!\nJob: ${JOB_NAME}"
         }
         failure {
             echo 'Build or test failed!'
@@ -63,6 +66,9 @@ pipeline {
                 echo "Build Number: ${BUILD_NUMBER}" >> build-result.txt
             '''
             archiveArtifacts artifacts: 'build-result.txt', allowEmptyArchive: true
+            mail to: 'byunhm02@gmail.com',
+                             subject: "Jenkins Build #${BUILD_NUMBER} FAILED",
+                             body: "Build #${BUILD_NUMBER} failed!\nJob: ${JOB_NAME}"
         }
     }
 }
