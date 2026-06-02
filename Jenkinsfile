@@ -50,16 +50,16 @@ pipeline {
             archiveArtifacts artifacts: 'test-output.txt', fingerprint: true
             junit 'test-reports/**/*.xml'
             sh '''
-                echo "빌드 성공! 시간: $(date)" > build-result.txt
-                echo "빌드 번호: ${BUILD_NUMBER}" >> build-result.txt
+                echo "build Success! Time: $(date)" > build-result.txt
+                echo "Build Number: ${BUILD_NUMBER}" >> build-result.txt
             '''
             archiveArtifacts artifacts: 'build-result.txt', fingerprint: true
         }
         failure {
             echo 'Build or test failed!'
             sh '''
-                echo "빌드 실패! 시간: $(date)" > build-result.txt
-                echo "빌드 번호: ${BUILD_NUMBER}" >> build-result.txt
+                echo "Build Failed! Time: $(date)" > build-result.txt
+                echo "Build Number: ${BUILD_NUMBER}" >> build-result.txt
             '''
             archiveArtifacts artifacts: 'build-result.txt', allowEmptyArchive: true
         }
